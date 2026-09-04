@@ -752,15 +752,20 @@
       <div class="check">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
       </div>
-      <h2>Details ready to copy</h2>
-      <p>Copy this into an email and send it on &mdash; nothing is booked until we confirm back to you.</p>
+      <h2>Request ready</h2>
+      <p>Send it on &mdash; nothing is booked until we confirm back to you.</p>
       <div class="recipient-card">
         <span class="to-label">Send to</span>
         <span class="to-email">paul@alliedsafetytraining.ie</span>
       </div>
-      <textarea id="requestTextArea" class="request-textarea" readonly rows="10"></textarea>
+      <a href="#" id="mailtoLink" class="mailto-btn" target="_top" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"></path><path d="m4 6 8 7 8-7"></path></svg>
+        <span>Open in your email app</span>
+      </a>
+      <div class="success-divider">or copy the details</div>
+      <textarea id="requestTextArea" class="request-textarea" readonly rows="8"></textarea>
       <div class="modal-actions">
-        <button type="button" class="modal-submit copy-btn" id="successCopyBtn">
+        <button type="button" class="modal-secondary copy-btn" id="successCopyBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           <span>Copy details</span>
         </button>
@@ -785,9 +790,9 @@
   // ---- Synced data (baked in at publish time) ----
   <!-- SYNC_DEBUG {"bodyType":"object","itemCount":53,"timeMinUsed":"2026-08-31T00:00:00.000Z","timeMaxUsed":"2026-12-02T00:00:00.000Z","firstThree":[{"summary":"Manual Handling- Lacey Eng Manual Handling x 3 1st Sept 2026","start":{"date":"2026-09-01"},"end":{"date":"2026-09-01"},"status":"confirmed"},{"summary":"Fire Warden-Pat O'Brien - Fire Warden Private Course 2nd Sept 2026","start":{"date":"2026-09-02"},"end":{"date":"2026-09-03"},"status":"confirmed"},{"summary":"St Bridgets Daycare Manual Handling","start":{"date":"2026-09-03"},"end":{"date":"2026-09-03"},"status":"confirmed"}],"bodyKeys":["kind","etag","summary","description","updated","timeZone","accessRole","defaultReminders","items"],"bodyError":null} -->
 var SYNC_DATA = {
-    generatedAt: "2026-09-04T23:53:07+01:00",
+    generatedAt: "2026-09-05T24:23:28+25:00",
     months: ["2026-09", "2026-10", "2026-11"],
-    unavailable: []
+    unavailable: ["2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-07","2026-09-08","2026-09-09","2026-09-10","2026-09-11","2026-09-14","2026-09-15","2026-09-16","2026-09-17","2026-09-18","2026-09-21","2026-09-22","2026-09-23","2026-09-24","2026-09-25","2026-09-28","2026-09-29","2026-09-30","2026-10-02","2026-10-07","2026-10-08","2026-10-09","2026-10-13","2026-10-14","2026-10-15","2026-10-16","2026-10-19","2026-10-20","2026-10-21","2026-10-22","2026-10-23","2026-10-27","2026-10-28","2026-11-05","2026-11-11","2026-11-12","2026-11-18","2026-11-19","2026-11-23","2026-11-24","2026-11-25","2026-11-27"]
   };
 
   var MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -1189,9 +1194,14 @@ var SYNC_DATA = {
     currentRequestText = buildRequestText(data, dateStr, extraDates);
     document.getElementById("requestTextArea").value = currentRequestText;
 
+    var subject = "Booking request - " + longDate(dateStr) + " (" + data.course + ")";
+    document.getElementById("mailtoLink").href =
+      "mailto:paul@alliedsafetytraining.ie?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(currentRequestText);
+
     modalForm.hidden = true;
     modalSuccess.hidden = false;
-    setTimeout(function () { document.getElementById("successCopyBtn").focus(); }, 50);
+    setTimeout(function () { document.getElementById("mailtoLink").focus(); }, 50);
   });
 
   function copyToClipboard(text, btn) {
