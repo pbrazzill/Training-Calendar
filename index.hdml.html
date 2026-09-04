@@ -1,0 +1,1244 @@
+<title>Course Availability</title>
+<style>
+  :root {
+    --navy: #1B2A4A;
+    --navy-deep: #12203A;
+    --gold: #B9862F;
+    --gold-soft: #E4C888;
+    --paper: #EDE9DD;
+    --surface: #FFFFFF;
+    --surface-2: #E3DFD1;
+    --border: #CFC8B4;
+    --ink: #33405C;
+    --muted: #6E6E6E;
+    --available: #2F8F5B;
+    --available-bg: #E1F1E7;
+    --available-border: #A9D8BC;
+    --booked: #B3492E;
+    --booked-bg: #F7E2DA;
+    --booked-border: #E0AC98;
+    --shadow: 0 1px 2px rgba(27,42,74,0.08), 0 10px 26px -12px rgba(27,42,74,0.28);
+  }
+
+  /* Fixed light theme, always — a client-facing booking page should
+     look the same crisp white/navy/gold every time, regardless of
+     the viewer's device setting. */
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Public Sans", -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 40px 24px 56px;
+  }
+
+  /* header */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid var(--navy);
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    background: var(--gold);
+    border-radius: 6px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--navy-deep);
+    letter-spacing: -0.5px;
+  }
+  .brand-text h1 {
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 23px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin: 0;
+    line-height: 1.05;
+    text-wrap: balance;
+    max-width: 30ch;
+  }
+  .brand-text p {
+    margin: 4px 0 0;
+    font-size: 13.5px;
+    color: var(--muted);
+    letter-spacing: 0.2px;
+  }
+
+  .sync-panel {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .sync-info {
+    text-align: right;
+    line-height: 1.35;
+  }
+  .sync-info .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+  }
+  .sync-info .stamp {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    color: var(--navy);
+    font-variant-numeric: tabular-nums;
+  }
+  .refresh-btn {
+    font-family: "Public Sans", sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--navy-deep);
+    background: var(--gold-soft);
+    border: 1px solid var(--gold);
+    border-radius: 7px;
+    padding: 9px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: transform 0.12s ease, background 0.12s ease;
+  }
+  .refresh-btn:hover { background: var(--gold); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  .refresh-btn svg {
+    width: 14px; height: 14px;
+    transition: transform 0.5s ease;
+  }
+  .refresh-btn.spinning svg { animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .intro {
+    font-size: 15px;
+    color: var(--ink);
+    max-width: 62ch;
+    margin: 0 0 24px;
+  }
+  .intro strong { color: var(--navy); }
+
+  /* legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .swatch {
+    width: 13px; height: 13px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    flex: none;
+  }
+  .swatch.available { background: var(--available-bg); border-color: var(--available-border); }
+  .swatch.booked { background: var(--booked-bg); border-color: var(--booked-border); }
+  .swatch.past { background: var(--surface); border-color: var(--border); }
+  .swatch.today { background: var(--paper); border: 2px solid var(--gold); }
+
+  /* months grid */
+  .months {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 880px) {
+    .months { grid-template-columns: 1fr; }
+    .masthead { align-items: flex-start; }
+    .sync-panel { flex-direction: column; align-items: flex-end; gap: 10px; }
+  }
+
+  .month-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 16px 20px;
+    box-shadow: var(--shadow);
+  }
+  .month-title {
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 600;
+    font-size: 19px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin: 0 0 12px;
+  }
+  .weekday-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .weekday-row span {
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .day {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid transparent;
+    position: relative;
+  }
+  .day.pad { visibility: hidden; }
+  .day.available {
+    background: var(--available-bg);
+    border-color: var(--available-border);
+    color: var(--available);
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .day.available:hover {
+    box-shadow: inset 0 0 0 1px var(--available);
+    transform: translateY(-1px);
+  }
+  .day.available:focus-visible {
+    outline: 2px solid var(--navy);
+    outline-offset: 1px;
+  }
+  .day.booked {
+    background: var(--booked-bg);
+    border-color: var(--booked-border);
+    color: var(--booked);
+  }
+  .day.past {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--muted);
+    opacity: 0.6;
+  }
+  .day.today {
+    outline: 2px solid var(--gold);
+    outline-offset: -1px;
+    font-weight: 700;
+  }
+
+  .footer-note {
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .footer-note a { color: var(--navy); font-weight: 600; text-decoration: none; }
+  .footer-note a:hover { text-decoration: underline; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .refresh-btn.spinning svg { animation: none; }
+    * { transition: none !important; }
+  }
+
+  /* booking request modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 32, 58, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 440px;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px -20px rgba(18, 32, 58, 0.5);
+    transform: translateY(10px) scale(0.98);
+    transition: transform 0.18s ease;
+  }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px 22px 2px;
+  }
+  .modal-header h2 {
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin: 0;
+  }
+  .modal-date {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  .modal-close:hover { color: var(--navy); }
+  .modal-close:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
+  .modal-body { padding: 10px 22px 22px; }
+  .field { margin-bottom: 13px; display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .field label .label-hint {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--muted);
+    font-size: 11.5px;
+  }
+  #addDateBtn { margin-top: 6px; }
+
+  /* course-dates rows */
+  .date-row { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+  .day-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--navy);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 8px 6px;
+    flex: none;
+    min-width: 46px;
+    text-align: center;
+  }
+  .day-static-value {
+    flex: 1;
+    font-size: 13.5px;
+    color: var(--ink);
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--surface-2);
+  }
+  .date-picker-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: "Public Sans", sans-serif;
+    font-size: 13.5px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--paper);
+    color: var(--muted);
+    cursor: pointer;
+    text-align: left;
+  }
+  .date-picker-btn:hover { border-color: var(--gold); }
+  .date-picker-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .date-picker-btn.chosen { color: var(--ink); font-weight: 600; }
+  .date-picker-btn .cal-icon { flex: none; display: flex; color: var(--muted); }
+  .remove-date-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px 6px;
+    flex: none;
+  }
+  .remove-date-btn:hover { color: var(--booked); }
+
+  /* mini calendar popover for Day 2 / Day 3 */
+  .date-picker-popover {
+    position: fixed;
+    z-index: 200;
+    width: 224px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 20px 46px -16px rgba(18, 32, 58, 0.45);
+    padding: 10px 12px 12px;
+  }
+  .picker-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .picker-nav button {
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--navy);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .picker-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .picker-nav span {
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+  .picker-weekdays, .picker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .picker-weekdays { margin-bottom: 3px; }
+  .picker-weekdays span {
+    text-align: center;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .picker-day {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    border: 1px solid transparent;
+  }
+  .picker-day.pad { visibility: hidden; }
+  .picker-day.available {
+    background: var(--available-bg);
+    border-color: var(--available-border);
+    color: var(--available);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .picker-day.available:hover { box-shadow: inset 0 0 0 1px var(--available); }
+  .picker-day.unavailable {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--muted);
+    opacity: 0.5;
+  }
+  .picker-day.selected { outline: 2px solid var(--gold); outline-offset: -1px; }
+  .field input, .field select, .field textarea {
+    font-family: "Public Sans", sans-serif;
+    font-size: 14px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--paper);
+    color: var(--ink);
+    width: 100%;
+  }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+    border-color: var(--gold);
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .modal-submit {
+    width: 100%;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: "Public Sans", sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+  }
+  .modal-submit:hover { background: var(--navy-deep); }
+  .modal-secondary {
+    width: 100%;
+    background: transparent;
+    color: var(--navy);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-family: "Public Sans", sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .modal-secondary:hover { border-color: var(--navy); }
+  .modal-note {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 10px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .modal-success { padding: 30px 24px 32px; text-align: center; }
+  .modal-success .check {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--available-bg);
+    border: 1px solid var(--available-border);
+    color: var(--available);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .modal-success .check svg { width: 22px; height: 22px; }
+  .modal-success h2 {
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin: 0 0 8px;
+  }
+  .modal-success p { font-size: 13.5px; color: var(--ink); margin: 0 0 16px; line-height: 1.5; text-align: left; }
+  .recipient-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+  }
+  .recipient-card .to-label {
+    font-family: "Public Sans", sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .recipient-card .to-email {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+  .request-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 190px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--ink);
+    resize: vertical;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+  .request-textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .copy-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 420px) {
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+
+<div class="page">
+  <div class="masthead">
+    <div class="brand">
+      <div class="brand-mark">AS</div>
+      <div class="brand-text">
+        <h1>Allied Safety Training &amp; Consultancy</h1>
+        <p>Course &amp; Site-Visit Availability</p>
+      </div>
+    </div>
+    <div class="sync-panel">
+      <div class="sync-info">
+        <div class="label">Last synced</div>
+        <div class="stamp" id="syncStamp">—</div>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <p class="intro">
+    A live read of our training calendar &mdash; <strong>green</strong> days are open for booking, <strong>red</strong> days are already committed to a course or site visit. Click any open date to send a booking request.
+  </p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch available"></span> Available</div>
+    <div class="legend-item"><span class="swatch booked"></span> Booked</div>
+    <div class="legend-item"><span class="swatch today"></span> Today</div>
+    <div class="legend-item"><span class="swatch past"></span> Past</div>
+  </div>
+
+  <div class="months" id="monthsContainer"></div>
+
+  <div class="footer-note">
+    <span>Weekends and unlisted days follow the same calendar sync.</span>
+    <span>To book a date, contact <a href="mailto:paul@alliedsafetytraining.ie">paul@alliedsafetytraining.ie</a></span>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+    <div id="modalForm">
+      <div class="modal-header">
+        <h2 id="modalTitle">Request a booking</h2>
+        <button class="modal-close" id="modalClose" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="bookingForm">
+          <div class="field-row">
+            <div class="field">
+              <label for="bfName">Name</label>
+              <input type="text" id="bfName" name="name" required autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="bfCompany">Company</label>
+              <input type="text" id="bfCompany" name="company" autocomplete="organization">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="bfEmail">Email</label>
+              <input type="email" id="bfEmail" name="email" required autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="bfPhone">Phone</label>
+              <input type="tel" id="bfPhone" name="phone" required autocomplete="tel">
+            </div>
+          </div>
+          <div class="field">
+            <label for="bfCourse">Course / service</label>
+            <select id="bfCourse" name="course" required>
+              <option value="" disabled selected>Select a course&hellip;</option>
+              <option>Emergency First Aid</option>
+              <option>First Aid at Work</option>
+              <option>First Aid Response (FAR)</option>
+              <option>Manual Handling</option>
+              <option>Fire Safety</option>
+              <option>Fire Warden</option>
+              <option>Abrasive Wheels</option>
+              <option>Working at Heights</option>
+              <option>Other / not sure</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Course dates <span class="label-hint">runs over more than one day? add up to 3 in total</span></label>
+            <div id="datesList"></div>
+            <button type="button" class="modal-secondary" id="addDateBtn">+ Add another day</button>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="bfAttendees">Approx. attendees</label>
+              <input type="number" id="bfAttendees" name="attendees" min="1" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="bfTime">Preferred start time</label>
+              <select id="bfTime" name="time">
+                <option value="" disabled selected>Select&hellip;</option>
+                <option>Morning</option>
+                <option>Afternoon</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="bfNotes">Notes</label>
+            <textarea id="bfNotes" name="notes" placeholder="Anything else we should know"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="modal-submit">Continue</button>
+            <button type="button" class="modal-secondary" id="copyDetails">Copy details instead</button>
+          </div>
+          <p class="modal-note">Prepares your booking details to copy into an email to paul@alliedsafetytraining.ie &mdash; nothing is booked until we confirm back to you.</p>
+        </form>
+      </div>
+    </div>
+
+    <div id="modalSuccess" class="modal-success" hidden>
+      <div class="check">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h2>Details ready to copy</h2>
+      <p>Copy this into an email and send it on &mdash; nothing is booked until we confirm back to you.</p>
+      <div class="recipient-card">
+        <span class="to-label">Send to</span>
+        <span class="to-email">paul@alliedsafetytraining.ie</span>
+      </div>
+      <textarea id="requestTextArea" class="request-textarea" readonly rows="10"></textarea>
+      <div class="modal-actions">
+        <button type="button" class="modal-submit copy-btn" id="successCopyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <span>Copy details</span>
+        </button>
+        <button type="button" class="modal-secondary" id="successClose">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="date-picker-popover" id="datePickerPopover" hidden>
+  <div class="picker-nav">
+    <button type="button" id="pickerPrev" aria-label="Previous month">&larr;</button>
+    <span id="pickerMonthLabel">—</span>
+    <button type="button" id="pickerNext" aria-label="Next month">&rarr;</button>
+  </div>
+  <div class="picker-weekdays" id="pickerWeekdays"></div>
+  <div class="picker-grid" id="pickerGrid"></div>
+</div>
+
+<script>
+  // ---- Synced data (baked in at publish time) ----
+  var SYNC_DATA = {
+    generatedAt: "2026-09-04T14:45:00+01:00",
+    months: ["2026-09", "2026-10", "2026-11"],
+    unavailable: ["2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-07","2026-09-08","2026-09-09","2026-09-10","2026-09-11","2026-09-14","2026-09-15","2026-09-16","2026-09-17","2026-09-18","2026-09-21","2026-09-22","2026-09-23","2026-09-24","2026-09-25","2026-09-28","2026-09-29","2026-09-30","2026-10-02","2026-10-07","2026-10-08","2026-10-09","2026-10-13","2026-10-14","2026-10-15","2026-10-16","2026-10-19","2026-10-20","2026-10-21","2026-10-22","2026-10-23","2026-10-27","2026-10-28","2026-11-05","2026-11-11","2026-11-12","2026-11-18","2026-11-19","2026-11-23","2026-11-24","2026-11-25","2026-11-27"]
+  };
+
+  var MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var WEEKDAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+  function pad2(n) { return n < 10 ? "0" + n : "" + n; }
+
+  function todayISO() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+  }
+
+  function renderMonth(monthKey, unavailableSet, todayStr) {
+    var parts = monthKey.split("-");
+    var year = parseInt(parts[0], 10);
+    var month = parseInt(parts[1], 10); // 1-12
+
+    var card = document.createElement("div");
+    card.className = "month-card";
+
+    var title = document.createElement("div");
+    title.className = "month-title";
+    title.textContent = MONTH_NAMES[month - 1] + " " + year;
+    card.appendChild(title);
+
+    var wrow = document.createElement("div");
+    wrow.className = "weekday-row";
+    WEEKDAYS.forEach(function (w) {
+      var s = document.createElement("span");
+      s.textContent = w;
+      wrow.appendChild(s);
+    });
+    card.appendChild(wrow);
+
+    var grid = document.createElement("div");
+    grid.className = "day-grid";
+
+    var firstOfMonth = new Date(year, month - 1, 1);
+    var firstWeekday = (firstOfMonth.getDay() + 6) % 7; // 0 = Monday
+    var daysInMonth = new Date(year, month, 0).getDate();
+
+    for (var i = 0; i < firstWeekday; i++) {
+      var pad = document.createElement("div");
+      pad.className = "day pad";
+      grid.appendChild(pad);
+    }
+
+    for (var d = 1; d <= daysInMonth; d++) {
+      var dateStr = year + "-" + pad2(month) + "-" + pad2(d);
+      var cell = document.createElement("div");
+      cell.className = "day";
+      cell.textContent = d;
+      cell.dataset.date = dateStr;
+
+      if (dateStr < todayStr) {
+        cell.className += " past";
+      } else if (unavailableSet.has(dateStr)) {
+        cell.className += " booked";
+      } else {
+        cell.className += " available";
+        cell.tabIndex = 0;
+        cell.setAttribute("role", "button");
+        cell.setAttribute("aria-label", "Request " + dateStr);
+      }
+      if (dateStr === todayStr) {
+        cell.className += " today";
+      }
+      grid.appendChild(cell);
+    }
+
+    card.appendChild(grid);
+    return card;
+  }
+
+  function formatStamp(iso) {
+    try {
+      var d = new Date(iso);
+      return d.toLocaleDateString("en-IE", { day: "2-digit", month: "short", year: "numeric" }) +
+        " · " + d.toLocaleTimeString("en-IE", { hour: "2-digit", minute: "2-digit" });
+    } catch (e) {
+      return iso;
+    }
+  }
+
+  var UNAVAILABLE_SET = new Set();
+
+  function render(data) {
+    var container = document.getElementById("monthsContainer");
+    container.innerHTML = "";
+    UNAVAILABLE_SET = new Set(data.unavailable || []);
+    var today = todayISO();
+    data.months.forEach(function (m) {
+      container.appendChild(renderMonth(m, UNAVAILABLE_SET, today));
+    });
+    document.getElementById("syncStamp").textContent = formatStamp(data.generatedAt);
+  }
+
+  render(SYNC_DATA);
+
+  // ---- Booking request modal ----
+  var overlay = document.getElementById("modalOverlay");
+  var modalForm = document.getElementById("modalForm");
+  var modalSuccess = document.getElementById("modalSuccess");
+  var bookingForm = document.getElementById("bookingForm");
+  var lastFocused = null;
+  var currentRequestText = "";
+
+  function longDate(dateStr) {
+    var d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("en-IE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  }
+
+  function openModal(dateStr) {
+    lastFocused = document.activeElement;
+    bookingForm.dataset.date = dateStr;
+    bookingForm.reset();
+    resetDatesList(dateStr);
+    modalForm.hidden = false;
+    modalSuccess.hidden = true;
+    overlay.classList.add("open");
+    setTimeout(function () { document.getElementById("bfName").focus(); }, 50);
+  }
+
+  function closeModal() {
+    overlay.classList.remove("open");
+    closePicker();
+    if (lastFocused) lastFocused.focus();
+  }
+
+  document.getElementById("monthsContainer").addEventListener("click", function (e) {
+    var cell = e.target.closest(".day.available");
+    if (cell) openModal(cell.dataset.date);
+  });
+  document.getElementById("monthsContainer").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var cell = e.target.closest(".day.available");
+    if (cell) { e.preventDefault(); openModal(cell.dataset.date); }
+  });
+
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    var popover = document.getElementById("datePickerPopover");
+    if (!popover.hidden) { closePicker(); return; }
+    if (overlay.classList.contains("open")) closeModal();
+  });
+
+  function buildRequestText(data, dateStr, extraDates) {
+    var allDays = [dateStr].concat(extraDates || []);
+    var dayLines = allDays.map(function (d, i) { return "Day " + (i + 1) + ": " + longDate(d); });
+    var lines = [
+      "Booking request – Allied Safety Training & Consultancy",
+      ""
+    ].concat(dayLines).concat([
+      "",
+      "Name: " + data.name,
+      "Company: " + (data.company || "–"),
+      "Email: " + data.email,
+      "Phone: " + data.phone,
+      "Course: " + data.course,
+      "Approx. attendees: " + (data.attendees || "–"),
+      "Preferred start time: " + (data.time || "–"),
+      "Notes: " + (data.notes || "–")
+    ]);
+    return lines.join("\n");
+  }
+
+  // ---- Course dates: Day 1 (fixed) + up to 2 more via a custom
+  // mini-calendar that only ever offers available days, so an
+  // unavailable or duplicate date can never be picked in the first
+  // place — no native date input, no post-hoc validation needed. ----
+  var MAX_EXTRA_DATES = 2;
+  var datesList = document.getElementById("datesList");
+  var addDateBtn = document.getElementById("addDateBtn");
+  var pickerPopover = document.getElementById("datePickerPopover");
+  var pickerGrid = document.getElementById("pickerGrid");
+  var pickerMonthLabel = document.getElementById("pickerMonthLabel");
+  var pickerPrevBtn = document.getElementById("pickerPrev");
+  var pickerNextBtn = document.getElementById("pickerNext");
+  var activePickerBtn = null;
+  var pickerMonthIdx = 0;
+
+  (function initPickerWeekdays() {
+    var row = document.getElementById("pickerWeekdays");
+    WEEKDAYS.forEach(function (w) {
+      var s = document.createElement("span");
+      s.textContent = w.charAt(0);
+      row.appendChild(s);
+    });
+  })();
+
+  function monthLabelFromKey(key) {
+    var p = key.split("-");
+    return MONTH_NAMES[parseInt(p[1], 10) - 1] + " " + p[0];
+  }
+
+  function relabelDayRows() {
+    datesList.querySelectorAll(".date-row[data-extra]").forEach(function (row, idx) {
+      row.querySelector(".day-label").textContent = "Day " + (idx + 2);
+    });
+  }
+
+  function updateAddDateBtn() {
+    var extraCount = datesList.querySelectorAll(".date-row[data-extra]").length;
+    addDateBtn.hidden = extraCount >= MAX_EXTRA_DATES;
+  }
+
+  function createDay1Row(dateStr) {
+    var row = document.createElement("div");
+    row.className = "date-row";
+    var label = document.createElement("div");
+    label.className = "day-label";
+    label.textContent = "Day 1";
+    var value = document.createElement("div");
+    value.className = "day-static-value";
+    value.textContent = longDate(dateStr);
+    row.appendChild(label);
+    row.appendChild(value);
+    return row;
+  }
+
+  function createExtraDayRow() {
+    var row = document.createElement("div");
+    row.className = "date-row";
+    row.setAttribute("data-extra", "1");
+
+    var label = document.createElement("div");
+    label.className = "day-label";
+    label.textContent = "Day";
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "date-picker-btn";
+    var lbl = document.createElement("span");
+    lbl.className = "btn-label";
+    lbl.textContent = "Select a date";
+    var icon = document.createElement("span");
+    icon.className = "cal-icon";
+    icon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+    btn.appendChild(lbl);
+    btn.appendChild(icon);
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      openPicker(btn);
+    });
+
+    var removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "remove-date-btn";
+    removeBtn.setAttribute("aria-label", "Remove this day");
+    removeBtn.textContent = "×";
+    removeBtn.addEventListener("click", function () {
+      if (activePickerBtn === btn) closePicker();
+      row.remove();
+      relabelDayRows();
+      updateAddDateBtn();
+    });
+
+    row.appendChild(label);
+    row.appendChild(btn);
+    row.appendChild(removeBtn);
+    return row;
+  }
+
+  function addExtraDateRow() {
+    var extraCount = datesList.querySelectorAll(".date-row[data-extra]").length;
+    if (extraCount >= MAX_EXTRA_DATES) return;
+    datesList.appendChild(createExtraDayRow());
+    relabelDayRows();
+    updateAddDateBtn();
+  }
+
+  function resetDatesList(dateStr) {
+    datesList.innerHTML = "";
+    datesList.appendChild(createDay1Row(dateStr));
+    updateAddDateBtn();
+  }
+
+  function collectExtraDates() {
+    var dates = [];
+    datesList.querySelectorAll(".date-picker-btn").forEach(function (btn) {
+      if (btn.dataset.date) dates.push(btn.dataset.date);
+    });
+    return dates;
+  }
+
+  function getOtherChosenDates(currentBtn) {
+    var chosen = new Set();
+    chosen.add(bookingForm.dataset.date); // Day 1
+    datesList.querySelectorAll(".date-picker-btn").forEach(function (btn) {
+      if (btn !== currentBtn && btn.dataset.date) chosen.add(btn.dataset.date);
+    });
+    return chosen;
+  }
+
+  function renderPicker() {
+    var monthKey = SYNC_DATA.months[pickerMonthIdx];
+    pickerMonthLabel.textContent = monthLabelFromKey(monthKey);
+    pickerPrevBtn.disabled = pickerMonthIdx <= 0;
+    pickerNextBtn.disabled = pickerMonthIdx >= SYNC_DATA.months.length - 1;
+
+    pickerGrid.innerHTML = "";
+    var parts = monthKey.split("-");
+    var year = parseInt(parts[0], 10);
+    var month = parseInt(parts[1], 10);
+    var firstOfMonth = new Date(year, month - 1, 1);
+    var firstWeekday = (firstOfMonth.getDay() + 6) % 7;
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var today = todayISO();
+    var takenDates = getOtherChosenDates(activePickerBtn);
+
+    for (var i = 0; i < firstWeekday; i++) {
+      var pad = document.createElement("div");
+      pad.className = "picker-day pad";
+      pickerGrid.appendChild(pad);
+    }
+    for (var d = 1; d <= daysInMonth; d++) {
+      var dateStr = year + "-" + pad2(month) + "-" + pad2(d);
+      var cell = document.createElement("div");
+      cell.className = "picker-day";
+      cell.textContent = d;
+
+      var isSelectable = dateStr >= today && !UNAVAILABLE_SET.has(dateStr) && !takenDates.has(dateStr);
+      if (isSelectable) {
+        cell.className += " available";
+        cell.addEventListener("click", (function (ds) { return function () { selectPickerDate(ds); }; })(dateStr));
+      } else {
+        cell.className += " unavailable";
+      }
+      if (activePickerBtn && activePickerBtn.dataset.date === dateStr) cell.className += " selected";
+      pickerGrid.appendChild(cell);
+    }
+  }
+
+  function openPicker(btn) {
+    activePickerBtn = btn;
+    var refMonthKey = (btn.dataset.date || bookingForm.dataset.date || (SYNC_DATA.months[0] + "-01")).slice(0, 7);
+    var idx = SYNC_DATA.months.indexOf(refMonthKey);
+    pickerMonthIdx = idx >= 0 ? idx : 0;
+    renderPicker();
+
+    pickerPopover.hidden = false;
+    var rect = btn.getBoundingClientRect();
+    var popW = 224, popH = 268;
+    var left = Math.min(rect.left, window.innerWidth - popW - 10);
+    var top = rect.bottom + 6;
+    if (top + popH > window.innerHeight - 10) top = Math.max(10, rect.top - popH - 6);
+    pickerPopover.style.left = left + "px";
+    pickerPopover.style.top = top + "px";
+  }
+
+  function closePicker() {
+    pickerPopover.hidden = true;
+    activePickerBtn = null;
+  }
+
+  function selectPickerDate(dateStr) {
+    if (!activePickerBtn) return;
+    activePickerBtn.dataset.date = dateStr;
+    activePickerBtn.classList.add("chosen");
+    activePickerBtn.querySelector(".btn-label").textContent = longDate(dateStr);
+    closePicker();
+  }
+
+  pickerPrevBtn.addEventListener("click", function () {
+    if (pickerMonthIdx > 0) { pickerMonthIdx--; renderPicker(); }
+  });
+  pickerNextBtn.addEventListener("click", function () {
+    if (pickerMonthIdx < SYNC_DATA.months.length - 1) { pickerMonthIdx++; renderPicker(); }
+  });
+  document.addEventListener("click", function (e) {
+    if (pickerPopover.hidden) return;
+    if (pickerPopover.contains(e.target)) return;
+    if (e.target.closest(".date-picker-btn")) return;
+    closePicker();
+  });
+
+  addDateBtn.addEventListener("click", addExtraDateRow);
+
+  bookingForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    var dateStr = bookingForm.dataset.date;
+    var extraDates = collectExtraDates();
+    var data = {
+      name: document.getElementById("bfName").value.trim(),
+      company: document.getElementById("bfCompany").value.trim(),
+      email: document.getElementById("bfEmail").value.trim(),
+      phone: document.getElementById("bfPhone").value.trim(),
+      course: document.getElementById("bfCourse").value,
+      attendees: document.getElementById("bfAttendees").value.trim(),
+      time: document.getElementById("bfTime").value.trim(),
+      notes: document.getElementById("bfNotes").value.trim()
+    };
+
+    currentRequestText = buildRequestText(data, dateStr, extraDates);
+    document.getElementById("requestTextArea").value = currentRequestText;
+
+    modalForm.hidden = true;
+    modalSuccess.hidden = false;
+    setTimeout(function () { document.getElementById("successCopyBtn").focus(); }, 50);
+  });
+
+  function copyToClipboard(text, btn) {
+    // Some copy buttons carry an icon + label span (success screen);
+    // others are plain text buttons (the in-form shortcut). Update
+    // whichever one this button has without clobbering the icon.
+    var label = btn.querySelector("span");
+    var original = label ? label.textContent : btn.textContent;
+    function setText(t) {
+      if (label) { label.textContent = t; } else { btn.textContent = t; }
+    }
+    function done(ok) {
+      setText(ok ? "Copied ✓" : "Couldn't copy – select manually");
+      setTimeout(function () { setText(original); }, 2000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+    } else {
+      done(false);
+    }
+  }
+
+  document.getElementById("copyDetails").addEventListener("click", function () {
+    var dateStr = bookingForm.dataset.date;
+    var data = {
+      name: document.getElementById("bfName").value.trim() || "–",
+      company: document.getElementById("bfCompany").value.trim(),
+      email: document.getElementById("bfEmail").value.trim() || "–",
+      phone: document.getElementById("bfPhone").value.trim() || "–",
+      course: document.getElementById("bfCourse").value || "–",
+      attendees: document.getElementById("bfAttendees").value.trim(),
+      time: document.getElementById("bfTime").value.trim(),
+      notes: document.getElementById("bfNotes").value.trim()
+    };
+    copyToClipboard(buildRequestText(data, dateStr, collectExtraDates()), this);
+  });
+
+  document.getElementById("successCopyBtn").addEventListener("click", function () {
+    copyToClipboard(currentRequestText, this);
+  });
+  document.getElementById("successClose").addEventListener("click", closeModal);
+
+  // Refresh = pick up the latest published version of this page.
+  var btn = document.getElementById("refreshBtn");
+  btn.addEventListener("click", function () {
+    btn.classList.add("spinning");
+    setTimeout(function () {
+      // Cache-bust so this actually re-fetches the live published
+      // page instead of a browser-cached copy.
+      var url = window.location.href.split("#")[0].split("?")[0];
+      window.location.replace(url + "?sync=" + Date.now());
+    }, 350);
+  });
+</script>
