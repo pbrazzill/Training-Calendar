@@ -618,6 +618,45 @@
     gap: 8px;
   }
   .copy-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .mailto-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    text-decoration: none;
+    font-family: "Public Sans", sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    background: var(--navy);
+    transition: background 0.12s ease;
+  }
+  .mailto-btn:hover { background: var(--navy-deep); }
+  .mailto-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .mailto-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .success-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .success-divider::before, .success-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
   [hidden] { display: none !important; }
 
   @media (max-width: 420px) {
